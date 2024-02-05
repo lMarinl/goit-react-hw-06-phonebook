@@ -1,23 +1,21 @@
-import { useEffect, useState } from 'react';
+import { useDispatch, useSelector } from 'react-redux';
 
 import { nanoid } from 'nanoid';
 import Notiflix from 'notiflix';
 
+import { ContactsList, Form, Filter } from 'components';
+import {
+  addContact,
+  deleteContact,
+} from '../redux/contactsSlice/contactsSlice.js';
 import css from './App.module.css';
-
-import { Form } from './Form/Form';
-import { ContactsList } from './ListContacts/ListContacts';
-import { Filter } from './Filter/Filter';
+import { useMemo } from 'react';
+import { filterContacts } from '../redux/filterSlice/filterSlice.js';
 
 export const App = () => {
-  const [contacts, setContacts] = useState(
-    JSON.parse(localStorage.getItem('contacts')) ?? []
-  );
-  const [filter, setFilter] = useState('');
-
-  useEffect(() => {
-    localStorage.setItem('contacts', JSON.stringify(contacts));
-  }, [contacts]);
+  const dispatch = useDispatch();
+  const { contacts } = useSelector(store => store.contacts);
+  const { filter } = useSelector(store => store.filter);
 
   const handlerAddContact = formData => {
     const hasDuplicates = contacts.some(
@@ -30,22 +28,33 @@ export const App = () => {
       return;
     }
     const newContact = { ...formData, id: nanoid() };
-    setContacts(prevState => [...prevState, newContact]);
+    const action = addContact(newContact);
+    dispatch(action);
   };
 
   const handleChangeFilter = event => {
     const value = event.target.value;
-    setFilter(value);
+    const action = filterContacts(value);
+    dispatch(action);
   };
 
-  const filterContacts = () => {
-    return contacts.filter(contact =>
-      contact.name.toLowerCase().includes(filter.toLowerCase().trim())
-    );
-  };
+  //   const filteredContacts = useMemo(() => {
+  //     return contacts?.filter(contact =>
+  //       contact.name.toLowerCase().includes(filter.toLowerCase().trim())
+  //     );
+  //   };
+  // )
 
+  const filteredContacts = useMemo(
+    () =>
+      contacts?.filter(contact =>
+        contact.name.toLowerCase().includes(filter.trim().toLowerCase())
+      ),
+    [filter, contacts]
+  );
   const handleDeleteContact = id => {
-    setContacts(prevState => prevState.filter(contact => contact.id !== id));
+    const actions = deleteContact(id);
+    dispatch(actions);
   };
 
   return (
@@ -54,10 +63,10 @@ export const App = () => {
       <Form handlerAddContact={handlerAddContact} />
       <div className={css.contactsContainer}>
         <h2 className={css.contactsTitle}>Contacts</h2>
-        <Filter filter={filter} handleChangeFilter={handleChangeFilter} />
+        <Filter handleChangeFilter={handleChangeFilter} />
 
         <ContactsList
-          contacts={filterContacts()}
+          contacts={filteredContacts}
           handleDeleteContact={handleDeleteContact}
         />
       </div>
