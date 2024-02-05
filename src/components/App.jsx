@@ -1,4 +1,5 @@
 import { useDispatch, useSelector } from 'react-redux';
+import { useMemo } from 'react';
 
 import { nanoid } from 'nanoid';
 import Notiflix from 'notiflix';
@@ -8,9 +9,10 @@ import {
   addContact,
   deleteContact,
 } from '../redux/contactsSlice/contactsSlice.js';
-import css from './App.module.css';
-import { useMemo } from 'react';
+
 import { filterContacts } from '../redux/filterSlice/filterSlice.js';
+
+import css from './App.module.css';
 
 export const App = () => {
   const dispatch = useDispatch();
@@ -37,13 +39,6 @@ export const App = () => {
     const action = filterContacts(value);
     dispatch(action);
   };
-
-  //   const filteredContacts = useMemo(() => {
-  //     return contacts?.filter(contact =>
-  //       contact.name.toLowerCase().includes(filter.toLowerCase().trim())
-  //     );
-  //   };
-  // )
 
   const filteredContacts = useMemo(
     () =>
