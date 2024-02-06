@@ -1,0 +1,1 @@
+export const selectedFilter = store => store.filter.filter

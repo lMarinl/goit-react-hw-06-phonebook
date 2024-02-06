@@ -1,6 +1,33 @@
+import { useDispatch, useSelector } from 'react-redux';
+
+import { nanoid } from 'nanoid';
+import Notiflix from 'notiflix';
+
+import { selectedContacts } from '../../redux/contactsSlice/contactsSelectors.js';
+import { addContact } from '../../redux/contactsSlice/contactsSlice.js';
+
 import css from './Form.module.css';
 
-export const Form = ({ handlerAddContact }) => {
+export const Form = ( ) => {
+
+  const dispatch = useDispatch();
+  const contacts  = useSelector(selectedContacts);
+
+  const handlerAddContact = formData => {
+    const hasDuplicates = contacts.some(
+      contact => contact.name === formData.name
+    );
+    if (hasDuplicates) {
+      Notiflix.Notify.warning(
+        'A contact with this name is already added to your contacts'
+      );
+      return;
+    }
+    const newContact = { ...formData, id: nanoid() };
+    const action = addContact(newContact);
+    dispatch(action);
+  };
+
   const handelSubmit = event => {
     event.preventDefault();
     const name = event.currentTarget.elements.name.value;
@@ -12,6 +39,7 @@ export const Form = ({ handlerAddContact }) => {
     };
     handlerAddContact(formData);
     event.currentTarget.reset();
+
   };
 
   return (

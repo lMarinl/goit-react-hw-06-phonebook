@@ -1,0 +1,1 @@
+export const selectedContacts = store => store.contacts.contacts
